@@ -262,5 +262,5 @@ def test_albu():
 
     results = albu_transform(results)
 
-    assert np.allclose(results['img'], img[::-1, ...])
-    assert np.allclose(results['gt_semantic_seg'], seg[::-1, ...])
+    assert np.allclose(results['img'], img[:, ::-1, :])
+    assert np.allclose(results['gt_semantic_seg'], seg[:, ::-1])
