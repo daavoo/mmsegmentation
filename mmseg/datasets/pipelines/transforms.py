@@ -655,8 +655,6 @@ class Albu(object):
     Args:
         transforms (list[dict]): A list of albu transformations
         keymap (dict): Contains {'input key':'albumentation-style key'}
-        skip_img_without_anno (bool): Whether to skip the image if no ann left
-            after aug
     """
 
     def __init__(self, transforms, keymap=None):

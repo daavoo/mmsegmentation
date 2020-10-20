@@ -242,8 +242,8 @@ def test_seg_rescale():
     assert rescale_results['gt_semantic_seg'].shape == (h, w)
 
 
-def test_albu():
-    albu_transform = dict(type='Albu', transforms=[dict(type='Flip', p=1)])
+def test_albu_dual_transfom():
+    albu_transform = dict(type='Albu', transforms=[dict(type='Flip', p=1.0)])
     albu_transform = build_from_cfg(albu_transform, PIPELINES)
 
     results = dict()
@@ -256,11 +256,36 @@ def test_albu():
     results['seg_fields'] = ['gt_semantic_seg']
     results['img_shape'] = img.shape
     results['ori_shape'] = img.shape
-    # Set initial values for default meta_keys
     results['pad_shape'] = img.shape
     results['scale_factor'] = 1.0
 
     results = albu_transform(results)
 
-    assert np.allclose(results['img'], img[:, ::-1, :])
-    assert np.allclose(results['gt_semantic_seg'], seg[:, ::-1])
+    # both img and mask is modified
+    assert np.allclose(results['img'], img[::-1, :, :])
+    assert np.allclose(results['gt_semantic_seg'], seg[::-1, :])
+
+
+def test_albu_image_transform():
+    albu_transform = dict(
+        type='Albu', transforms=[dict(type='HueSaturationValue', p=1)])
+    albu_transform = build_from_cfg(albu_transform, PIPELINES)
+
+    results = dict()
+    img = mmcv.imread(
+        osp.join(osp.dirname(__file__), '../data/color.jpg'), 'color')
+    seg = np.array(
+        Image.open(osp.join(osp.dirname(__file__), '../data/seg.png')))
+    results['img'] = img
+    results['gt_semantic_seg'] = seg
+    results['seg_fields'] = ['gt_semantic_seg']
+    results['img_shape'] = img.shape
+    results['ori_shape'] = img.shape
+    results['pad_shape'] = img.shape
+    results['scale_factor'] = 1.0
+
+    results = albu_transform(results)
+
+    # mask is not modified
+    assert not np.allclose(results['img'], img)
+    assert np.allclose(results['gt_semantic_seg'], seg)
